@@ -15,6 +15,5 @@
     "npm:@ogulcancelik/pi-ghostty-theme-sync",
     "npm:@tmustier/pi-agent-guidance",
     "npm:@tmustier/pi-usage-extension"
-  ],
-  "theme": "ghostty-sync-4cf8eda3"
+  ]
 }
