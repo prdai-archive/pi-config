@@ -36,6 +36,7 @@ Work should happen through normal feature branches and pull requests.
 
 Commits are part of the collaboration loop.
 
+- **Commit messages are single-line subjects by default: no description/body unless the user explicitly asks for one.**
 - **IMPORTANT: Never commit private credentials, secrets, tokens, or sensitive local machine details** anywhere in the repo. Redact or ask the user how to handle it if sensitive data shows up.
 - Do not commit initial agent changes automatically unless the user asks for a commit.
 - After the user reviews the current work and asks for changes, apply only that requested change, verify it, then make a focused follow-up commit if commits are in scope.
