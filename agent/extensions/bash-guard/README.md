@@ -63,3 +63,7 @@ Auto-discovered from `~/.pi/agent/extensions/bash-guard/`. Run `/reload` in pi.
 - Scope: `bash` tool calls only (`write`/`edit` and user `!` commands are not intercepted).
 - `--bash-guard-auto-allow`: main-session flag that allows flagged commands when there is no UI
   (e.g. running pi non-interactively). Has no effect in subagent sessions.
+- `pi --approve` / `pi -a` (trust project-local files): bash-guard disables itself for the whole
+  run — no prompts in the main session, no hard-blocks in subagents. The mode propagates to
+  spawned subagents via `PI_BASH_GUARD_DISABLED=1`. Pass `--no-approve`/`-na` later in the args
+  to re-enable it (last flag wins, mirroring pi's own parser).

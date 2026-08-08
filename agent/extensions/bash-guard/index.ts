@@ -357,6 +357,19 @@ async function promptRunOrAbort(ctx: any, command: string, risk: Risk): Promise<
 const _subagentDepth = Number(process.env.PI_SUBAGENT_DEPTH ?? "0");
 const _isSubagent = Number.isFinite(_subagentDepth) && _subagentDepth >= 1;
 
+// `pi --approve` / `pi -a` means the user opted into unattended/trusted operation:
+// bash-guard steps aside entirely instead of interrupting. Mirror the CLI parser
+// (last flag wins) so `--approve --no-approve` behaves like pi itself.
+let _approveMode = false;
+for (const arg of process.argv.slice(2)) {
+	if (arg === "--approve" || arg === "-a") _approveMode = true;
+	else if (arg === "--no-approve" || arg === "-na") _approveMode = false;
+}
+if (_approveMode) {
+	// Spawned subagents inherit env (not argv), so flag the run for them too.
+	process.env.PI_BASH_GUARD_DISABLED = "1";
+}
+
 // Hard-block patterns for subagent (headless) mode. Criteria: unrecoverable by default AND
 // unlikely to be intentional in an automated context. Fewer false positives over broad coverage —
 // the interactive prompt handles the rest for main sessions.
@@ -394,6 +407,8 @@ const HEADLESS_BLOCKED: Array<{ pattern: RegExp; reason: string }> = [
 
 export default function (pi: ExtensionAPI) {
 	if (_isSubagent) {
+		// Approved runs (inherited from a `pi --approve` parent) skip bash-guard entirely.
+		if (process.env.PI_BASH_GUARD_DISABLED === "1") return;
 		// Subagent mode: hard-block catastrophic operations, no prompting.
 		pi.on("tool_call", async (event) => {
 			if (!isToolCallEventType("bash", event)) return;
@@ -426,6 +441,9 @@ export default function (pi: ExtensionAPI) {
 
 	pi.on("tool_call", async (event, ctx) => {
 		if (!isToolCallEventType("bash", event)) return;
+
+		// `pi --approve` (or `-a`): user opted into trusted/unattended operation — no prompts, no blocks.
+		if (_approveMode) return;
 
 		const command = event.input.command;
 		const risk = analyzeBashCommand(command);
